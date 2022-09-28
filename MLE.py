@@ -54,7 +54,7 @@ def result(real, calc):
 
 def ascent():
     theta = [.1]*3
-    alpha = 0.000001
+    alpha = 0.0000001
     i = 0
     j = 0 
     m = 0
@@ -70,10 +70,6 @@ def ascent():
         i+=1
         m+=1
     print(theta)
-    i = 0
-    while i < 10:
-        #print("this is the hypo: ", hypothesis(theta, x, i)," this is the actual: ", status[i])
-        i+=1
 
     fig,ax=plt.subplots()
     ax.plot(iter, thetarr1)
@@ -93,8 +89,8 @@ def MLE():
         while j <= 2:
             L[j] = (status[i]-gz(theta, x, i))*x[j][i]
             j+=1
-        hyp =hypothesis(L,x,i)
-        if hyp > 5000:
+        hyp =gz(L,x,i)
+        if hyp >= 1:
             hyp =2
         else:
             hyp =1
@@ -103,7 +99,7 @@ def MLE():
 
         result(status[i],hyp)
 
-        #print("this is the hypo: ", hypothesis(L,x,i)," this is the actual: ", status[i])
+        print("this is the hypo: ", gz(L,x,i)," this is the actual: ", status[i])
         j = 0
         i+=1
     precision = len(TP)/(len(TP)+len(FP))
