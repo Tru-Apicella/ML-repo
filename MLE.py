@@ -69,6 +69,10 @@ def ascent():
         j = 0
         i+=1
         m+=1
+    i = 0
+    while i < 50:
+        print("the actual value is: ", status[i]," the hypo: ", gz(theta,x,i))
+        i+=1
     print(theta)
 
     fig,ax=plt.subplots()
@@ -109,5 +113,5 @@ def MLE():
     MSE = np.square(np.subtract(tstatus,hypoarr)).mean()
     print(MSE)
 
-MLE()
+ascent()
     
