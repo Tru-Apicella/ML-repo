@@ -25,10 +25,10 @@ thetarr2 =[]
 thetarr3 =[]
 hypoarr = []
 tstatus = []
-TP = []
-TN = []
-FP = []
-FN = []
+TP = 0
+TN = 0
+FP = 0
+FN = 0
 def create_list(x, i):
     tmplist = [x[0][i],x[1][i],x[2][i]]
     return tmplist
@@ -41,20 +41,23 @@ def gz(theta, x, i):
 
 def result(real, calc):
     if real ==1 and calc == 1:
-        TN.append(1)
+        global TN
+        TN +=1
     if real ==1 and calc == 2:
-        FP.append(1)
+        global FP
+        FP+=1
     if real ==2 and calc == 1:
-        FN.append(1)
+        global FN
+        FN+=1
     if real ==2 and calc == 2:
-        TP.append(1)
-    
+        global TP
+        TP+=1
 
 
 
-def ascent():
-    theta = [.1]*3
-    alpha = 0.0000001
+def MLE():
+    theta = [2.5]*3
+    alpha = 0.00001
     i = 0
     j = 0 
     m = 0
@@ -69,9 +72,17 @@ def ascent():
         j = 0
         i+=1
         m+=1
-    i = 0
-    while i < 50:
-        print("the actual value is: ", status[i]," the hypo: ", gz(theta,x,i))
+        
+    while i < len(age):
+        #print("the actual value is: ", status[i]," the hypo: ", gz(theta,x,i))
+        hyp =gz(theta,x,i)
+        if hyp >= 0.5:
+            hyp =2
+        else:
+            hyp =1
+        result(status[i],hyp)
+        hypoarr.append(hyp)
+        tstatus.append(status[i])
         i+=1
     print(theta)
 
@@ -81,37 +92,18 @@ def ascent():
     ax.set_ylabel("theta")
     ax.plot(iter, thetarr2)
     ax.plot(iter, thetarr3)
-    plt.show()
-    return theta
+    #plt.show()
 
-def MLE():
-    theta = ascent()
-    i = 0
-    j = 0 
-    L = [0]*3
-    while (i <len(age)):
-        while j <= 2:
-            L[j] = (status[i]-gz(theta, x, i))*x[j][i]
-            j+=1
-        hyp =gz(L,x,i)
-        if hyp >= 1:
-            hyp =2
-        else:
-            hyp =1
-        hypoarr.append(hyp)
-        tstatus.append(status[i])
-
-        result(status[i],hyp)
-
-        print("this is the hypo: ", gz(L,x,i)," this is the actual: ", status[i])
-        j = 0
-        i+=1
-    precision = len(TP)/(len(TP)+len(FP))
-    recall = len(TP)/(len(TP)+len(FN))
+    
+    precision = TP/(TP+FP)
+    recall = TP/(TP+FN)
     fscore = 2*(recall*precision)/(recall+precision)
-    print(len(TP),len(TN),len(FP),len(FN),precision, recall,fscore)
+    print("true positive: ",TP," true negative: ",TN," false positive: ",FP," false negative: ",FN," Precision: ",precision," recall: ",recall," fscore: ",fscore)
+
+
     MSE = np.square(np.subtract(tstatus,hypoarr)).mean()
     print(MSE)
 
-ascent()
+
+MLE()
     
