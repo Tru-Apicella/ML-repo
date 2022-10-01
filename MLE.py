@@ -56,7 +56,9 @@ def result(real, calc):
 
 
 
-def MLE(alpha,theta):
+def MLE():
+    alpha = 0.00001
+    theta = [2.5]*3
     i = 0
     j = 0 
     m = 0
@@ -73,7 +75,7 @@ def MLE(alpha,theta):
         m+=1
         
     while i < len(age):
-        print("the actual value is: ", status[i]," the hypo: ", gz(theta,x,i))
+        #print("the actual value is: ", status[i]," the hypo: ", gz(theta,x,i))
         hyp =gz(theta,x,i)
         if hyp >= 0.6:
             hyp =2
@@ -104,13 +106,12 @@ def MLE(alpha,theta):
     print("mean squared error",MSE)
 
 def normalization():
-    alpha = 0.00001
-    theta = [2.5]*3
     j = 0
     global x
     x = preprocessing.normalize(x)
-    MLE(alpha, theta)
+    print("this data is normalized")
+    MLE()
 
 
-#MLE(alpha = 0.00001, theta = [2.5]*3)
+#MLE()
 normalization()
