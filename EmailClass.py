@@ -4,25 +4,14 @@ import itertools as it
 import matplotlib.pyplot as plt
 
 #format for spam and not spam arrays will be as following spam[testing/training[each email[words in email]]]
-testing = []
-training = []
-stesting = []
-straining = []
+testing,training,stesting,straining,thetarr,iterarr = [[]for _ in range(6)]
 not_spam = [training,testing]
 spam = [straining,stesting]
-totspam = 0
-totnspam = 0
-TP = 0
-TN = 0
-FP = 0
-FN = 0
-theta = 1
-thetarr = []
-iterarr = []
+sns = [spam,not_spam]
+totspam,totnspam,TP,TN,FP,FN,theta = 0,0,0,0,0,0,1
 
 def make_arrays(array, type):
-    i = 1
-    j = 0
+    i,j = 1,0
     global totnspam
     global totspam
     while i <= 25:
@@ -68,43 +57,6 @@ def create_vocab():
         vocabulary.append(x)
     return vocabulary
 
-def fill_matrix():
-    for x in enumerate(spam):
-        for y in enumerate(spam[x[0]]):
-            n = -1
-            for z in enumerate(spam[x[0]][y[0]]):
-                n1 = vocab.index(z[1])
-                if n != -1:
-                    matrix[n][n1]+=1
-                n = vocab.index(z[1])
-    for x in enumerate(not_spam):
-        for y in enumerate(not_spam[x[0]]):
-            n = -1
-            for z in enumerate(not_spam[x[0]][y[0]]):
-                n1 = vocab.index(z[1])
-                if n != -1:
-                    matrix[n][n1]+=1
-                n = vocab.index(z[1])
-    
-def corpus():
-    for x in enumerate(matrix):
-        for y in enumerate(matrix[x[0]]):
-            if matrix[x[0]][y[0]]!=0:
-                tot = sum(matrix[x[0]])
-                i = 0
-                matrix[x[0]][y[0]] = ((matrix[x[0]][y[0]])/tot)
-
-def getSentence(sentence):
-    index = -1
-    index1 = 0
-    total = 1
-    for x in enumerate(sentence):
-        index1 = vocab.index(x[1])
-        if index != -1:
-            total*=matrix[index][index1]
-        index = vocab.index(x[1])
-    return total
-
 def W2V(sentence, type):
     total = 1
     if type == 1:
@@ -135,28 +87,18 @@ def bayes():
     i = 0
     global totnspam
     global totspam
-    for x in enumerate(spam):
-        for y in enumerate(spam[x[0]]):
-            n = -1
-            for z in spam[x[0]][y[0]]:
-                n1 = vocab.index(z)
-                if n != -1:
-                    nspam = all_spam.count(z)
-                    nall = unfiltered_vocab.count(z)
-                    bayesprob =((nspam/(totspam+totnspam))/(nall/(totspam+totnspam)))
-                    matrix[n][n1]= bayesprob
-                n = vocab.index(z)
-    for x in enumerate(not_spam):
-        for y in enumerate(not_spam[x[0]]):
-            n = -1
-            for z in not_spam[x[0]][y[0]]:
-                n1 = vocab.index(z)
-                if n != -1:
-                    nspam = all_spam.count(z)
-                    nall = unfiltered_vocab.count(z)
-                    bayesprob =((nspam/(totspam+totnspam))/(nall/(totspam+totnspam)))
-                    matrix[n][n1]= bayesprob
-                n = vocab.index(z)
+    for w in enumerate(sns):
+        for x in enumerate(sns[w[0]]):
+            for y in enumerate(sns[w[0]][x[0]]):
+                n = -1
+                for z in sns[w[0]][x[0]][y[0]]:
+                    n1 = vocab.index(z)
+                    if n != -1:
+                        nspam = all_spam.count(z)
+                        nall = unfiltered_vocab.count(z)
+                        bayesprob =((nspam/(totspam+totnspam))/(nall/(totspam+totnspam)))
+                        matrix[n][n1]= bayesprob
+                    n = vocab.index(z)
     btest()
 
 def hyp(x,theta):
@@ -170,20 +112,15 @@ def SGD():
     iter = 0
     num = 0
     while num < 50:
-        for i in not_spam[1]:
-            x = W2V(i,0)
-            #x = BOW(i,0)
-            theta = theta - alpha*(hyp(x,theta)-0)*x
-            iter+=1
-            thetarr.append(theta)
-            iterarr.append(iter)
-        for i in spam[1]:
-            x = W2V(i,1)
-            #x = BOW(i,0)
-            theta = theta - alpha*(hyp(x,theta)-1)*x
-            iter+=1
-            thetarr.append(theta)
-            iterarr.append(iter)
+        for j in enumerate(sns):
+            for i in sns[j[0]][1]:
+                #change this to use either word to vector or bag of words
+                #x = W2V(i,0)
+                x = BOW(i,0)
+                theta = theta - alpha*(hyp(x,theta)-0)*x
+                iter+=1
+                thetarr.append(theta)
+                iterarr.append(iter)
         num+=1
     test(theta,iterarr,thetarr)
 
@@ -203,11 +140,11 @@ def ngram(sentence, i):
         return 0
 
 def test(theta,iterarr,thetarr):
+    print("result of using bag of words")
     i = 0
     while i < 5:
         hypo = hyp(W2V(spam[1][i],1),theta)
-        print("the spam hyp is: ", hypo)
-        if hypo > 1:
+        if hypo < 10**(-15):
             hypo = 1
             result(1,1)
         else:
@@ -218,7 +155,6 @@ def test(theta,iterarr,thetarr):
     i = 0
     while i < 5:
         hypo = hyp(W2V(not_spam[1][i],0),theta)
-        print("the not spam hyp is: ", hypo)
         if hypo > 1:
             hypo = 1
             result(0,1)
@@ -227,25 +163,25 @@ def test(theta,iterarr,thetarr):
             result(0,0)
         print("the not spam hyp is: ", hypo)
         i+=1
-    #report()
-    print(theta)
+    report()
     plt.plot(iterarr, thetarr)
     plt.show()
 
 def btest():
+    print("result of training using naive bayes and ngram model")
     i = 0
     while i < 5:
-        hypo =ngram(spam[1][i],1)
+        hypo =ngram(spam[0][i],1)
         print("the spam hyp is: ", hypo)
         result(1,hypo)
         i+=1
     i = 0
     while i < 5:
-        hypo =ngram(not_spam[1][i],1)
+        hypo =ngram(not_spam[0][i],1)
         print("the not spam hyp is: ", hypo)
         result(0,hypo)
         i+=1
-    #report()
+    report()
 
 def result(real, calc):
     if real ==0 and calc == 0:
@@ -279,7 +215,6 @@ unfiltered_vocab = create_vocab()
 vocab = list(set(unfiltered_vocab))
 s = len(vocab)
 matrix = [[0 for x in range(s)] for y in range(s)]
-#fill_matrix()
+#comment out sgd and uncomment bayes to run bayes
 bayes()
 #SGD()
-print("breakpoint")
